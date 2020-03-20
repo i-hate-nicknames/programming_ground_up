@@ -1,0 +1,6 @@
+/*
+!.gitignore
+!/ch*/
+/ch*/*
+!/ch*/*.s
+
