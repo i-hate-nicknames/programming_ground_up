@@ -7,11 +7,6 @@
 # %eax - current data item
 # data_items: contains the item data, 0 - terminated
 
-.section .data
-
-data_items:
-    .long 3, 67, 11, 23, 12, 11 , 5, 41, 42, 5, 3, 0
-
 .section .text
 
 .globl _start
@@ -44,3 +39,8 @@ loop_exit:
     # which will be returned as exit code of the program
     movl $1, %eax
     int $0x80
+
+.section .data
+
+data_items:
+    .long 3, 67, 11, 23, 12, 11 , 5, 41, 42, 5, 3, 0
