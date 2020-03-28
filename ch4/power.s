@@ -54,6 +54,12 @@ power:
 
     movl %ebx, -4(%ebp) # store current result
 
+    # handle zero power case
+    cmpl $0, %ecx
+    jne power_loop_start
+    movl $1, -4(%ebp)
+    jmp end_power
+
 power_loop_start:
     cmpl $1, %ecx
     je end_power
