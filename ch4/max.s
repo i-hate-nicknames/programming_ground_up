@@ -7,7 +7,7 @@ lst1:
 lst1_end:
 
 lst2:
-    .long 5, 0, 3
+    .long 5, 0, 3, 51
 lst2_end:
 
 lst3:
@@ -18,24 +18,52 @@ lst3_end:
 
 .globl _start
 
+# Just to show off: create an improvised list on the stack,
+# with the top of the stack reserved as list end address,
+# and three local variables after that that constitute the list
+# Collect max numbers from different lists via max procedure
+# and then call max procedure on the improvised list to get
+# max value among the results
+
 _start:
-    # call max three times, return result of the third call
-    # as exit status
+    # init "root" stack frame
+    movl %esp, %ebp
+    # reserve 16 bytes space for three integers and the list
+    # ending
+    subl $16, %esp
+    # call max three times, store results as local variables
+    # on the stack
     movl $lst1_end, %eax
     pushl %eax
     movl $lst1, %eax
     pushl %eax
     call max
+    movl %eax, -4(%ebp)
     movl $lst2_end, %eax
     pushl %eax
     movl $lst2, %eax
     pushl %eax
     call max
+    movl %eax, -8(%ebp)
     movl $lst3_end, %eax
     pushl %eax
     movl $lst3, %eax
     pushl %eax
     call max
+    movl %eax, -12(%ebp)
+
+
+    # call max giving it addresses to our stack. Since stack grows
+    # downwards, we pass -12(%ebp) as start of the list and %ebp
+    # as the end
+    movl %ebp, %eax
+    pushl %eax
+    # put the addres of the first variable, the start of the list
+    movl %ebp, %eax
+    subl $12, %eax
+    pushl %eax
+    call max
+
     movl %eax, %ebx
     movl $1, %eax
     int $0x80
