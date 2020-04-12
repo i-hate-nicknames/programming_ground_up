@@ -10,7 +10,7 @@
 _start:
     pushl $5
 
-    call factorial
+    call factorial_iter
     addl $4, %esp
     movl %eax, %ebx
     movl $1, %eax
@@ -36,6 +36,28 @@ factorial:
     imull %ebx, %eax # multiply n by (n-1)!
 
 end_factorial:
+    movl %ebp, %esp
+    popl %ebp
+    ret
+
+.type factorial_iter,@function
+factorial_iter:
+    push %ebp
+    movl %esp, %ebp
+
+    # move argument to ebx
+    movl 8(%ebp), %ebx
+    # eax will hold intermediate result
+    movl $1, %eax
+
+factorial_iter_loop:
+    cmpl $0, %ebx
+    je end_factorial_iter
+    imull %ebx, %eax
+    decl %ebx
+    jmp factorial_iter_loop
+
+end_factorial_iter:
     movl %ebp, %esp
     popl %ebp
     ret
