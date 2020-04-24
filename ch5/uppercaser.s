@@ -58,18 +58,26 @@ _start:
     # allocate space for local variables
     subl $ST_SIZE_RESERVE, %esp
 
-open_files:
-open_fd_in:
-    # open syscall
-    movl $SYS_OPEN, %eax
-    # input filename is the first argument to the program
-    movl ST_ARGV1(%ebp), %ebx
-    movl $O_RDONLY, %ecx
-    movl $0666, %edx
-    int $LINUX_SYSCALL
+setup_fds:
+    movl ST_ARGC(%ebp), %eax
+    # if no arguments provided, use stdin and stdout
+    cmpl $1, %eax
+    je use_stdin_stdout
+    # if one argument is provided use it as input file, use stdout as output
+    cmpl $2, %eax
+    je use_stdout
+    # if two arguments are provided use them as input and output files
+    jmp open_files
+use_stdin_stdout:
+    movl $STDIN, FD_IN
+    movl $STDOUT, FD_OUT
+    jmp read_loop_begin
 
-store_fd_in:
-    movl %eax, FD_IN
+use_stdout:
+    movl $STDOUT, FD_OUT
+    jmp open_fd_in
+
+open_files:
 
 open_fd_out:
     # open syscall
@@ -83,6 +91,18 @@ open_fd_out:
 
 store_fd_out:
     movl %eax, FD_OUT
+
+open_fd_in:
+    # open syscall
+    movl $SYS_OPEN, %eax
+    # input filename is the first argument to the program
+    movl ST_ARGV1(%ebp), %ebx
+    movl $O_RDONLY, %ecx
+    movl $0666, %edx
+    int $LINUX_SYSCALL
+
+store_fd_in:
+    movl %eax, FD_IN
 
 read_loop_begin:
     # Read in a block from input file
