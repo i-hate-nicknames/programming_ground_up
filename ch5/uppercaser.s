@@ -34,6 +34,9 @@
 .equ BUF_SIZE, 500
 .lcomm BUF_DATA, BUF_SIZE
 
+.lcomm FD_OUT, 4
+.lcomm FD_IN, 4
+
 .section .text
 
 # Stack positions
@@ -66,7 +69,7 @@ open_fd_in:
     int $LINUX_SYSCALL
 
 store_fd_in:
-    movl %eax, ST_FD_IN(%ebp)
+    movl %eax, FD_IN
 
 open_fd_out:
     # open syscall
@@ -79,13 +82,13 @@ open_fd_out:
     int $LINUX_SYSCALL
 
 store_fd_out:
-    movl %eax, ST_FD_OUT(%ebp)
+    movl %eax, FD_OUT
 
 read_loop_begin:
     # Read in a block from input file
     movl $SYS_READ, %eax
     # get input file descriptor
-    movl ST_FD_IN(%ebp), %ebx
+    movl FD_IN, %ebx
     # the location to read into
     movl $BUF_DATA, %ecx
     # size to read (at most this much will be read)
@@ -108,7 +111,7 @@ continue_read_loop:
     # write the block to the output file
     movl %eax, %edx # size of the block
     movl $SYS_WRITE, %eax
-    movl ST_FD_OUT(%ebp), %ebx
+    movl FD_OUT, %ebx
     movl $BUF_DATA, %ecx
     int $LINUX_SYSCALL
 
@@ -117,11 +120,11 @@ continue_read_loop:
 end_loop:
     # close the files
     movl $SYS_CLOSE, %eax
-    movl ST_FD_OUT(%ebp), %ebx
+    movl FD_OUT, %ebx
     int $LINUX_SYSCALL
 
     movl $SYS_CLOSE, %eax
-    movl ST_FD_IN(%ebp), %ebx
+    movl FD_IN, %ebx
     int $LINUX_SYSCALL
 
     movl $SYS_EXIT, %eax
