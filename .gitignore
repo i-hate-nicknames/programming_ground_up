@@ -3,4 +3,5 @@
 !/ch*/
 /ch*/*
 !/ch*/*.s
+!/ch*/Makefile
 
