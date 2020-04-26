@@ -15,8 +15,7 @@
 
 
 .section .bss
-.equ MAX_CHARS, 5
-.equ BUF_SIZE, 6
+.equ BUF_SIZE, 50
 .lcomm BUF_DATA, BUF_SIZE
 
 .section .data
@@ -41,9 +40,15 @@ printline:
     movl $0, %edx
     movl ST_ARG_INPUT(%ebp), %ecx
 copy_loop:
-    # todo: print multiple times from the same buffer
-    cmpl $MAX_CHARS, %edx
-    je end
+    # write buffer when it's full
+    cmpl $BUF_SIZE, %edx
+    jl continue_writing
+    # save %ecx because it may be modified by write_buffer
+    pushl %ecx
+    call write_buffer
+    popl %ecx
+    movl $0, %edx
+continue_writing:
     movb (%ecx), %al
     cmpb $0, %al
     je add_newline
@@ -56,22 +61,23 @@ add_newline:
     movb newline_char, %al
     movb %al, BUF_DATA(%edx)
     incl %edx
-print:
-    movl $SYS_WRITE, %eax
-    movl $STDOUT, %ebx
-    movl $BUF_DATA, %ecx
-    # buf size is already in %edx
-    int $LINUX_SYSCALL
+    call write_buffer
 end:
     movl %ebp, %esp
     popl %ebp
     ret
 
-.globl _start
+write_buffer:
+    pushl %ebp
+    movl %esp, %ebp
+    push %ebx
 
-_start:
-    movl $some_string, %eax
-    pushl %eax
-    call printline
-    movl $SYS_EXIT, %eax
+    movl $SYS_WRITE, %eax
+    movl $STDOUT, %ebx
+    movl $BUF_DATA, %ecx
+    # buf size is already in %edx
     int $LINUX_SYSCALL
+    popl %ebx
+    movl %ebp, %esp
+    popl %ebp
+    ret
