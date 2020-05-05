@@ -22,7 +22,7 @@ read_record:
     # we use %ebx so we have to store previous value
     pushl %ebx
     movl ST_FD_READ(%ebp), %ebx
-    movl ST_READ_BUFFER, %ecx
+    movl ST_READ_BUFFER(%ebp), %ecx
     movl $RECORD_SIZE, %edx
     movl $SYS_READ, %eax
     int $LINUX_SYSCALL
