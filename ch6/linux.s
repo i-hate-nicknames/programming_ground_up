@@ -3,6 +3,7 @@
 .equ SYS_CLOSE, 6
 .equ SYS_READ, 3
 .equ SYS_WRITE, 4
+.equ SYS_LSEEK, 19    
 .equ SYS_EXIT, 1
 
 .equ LINUX_SYSCALL, 0x80
